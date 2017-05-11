@@ -1,7 +1,7 @@
 OJTOP = {}
 OJTOP.ename = 'OJTOP'
 OJTOP.name = 'oJ_TxtOutput' -- sugar daddy
-OJTOP.version = '1.0.3'
+OJTOP.version = '1.0.4'
 OJTOP.init = false
 OJTOP.savedata = {}
 local WM = WINDOW_MANAGER
@@ -55,9 +55,13 @@ end
 function OJTOP.oj_quest_offered()
     findAllTxt4InteractWindow(0)
 end
+function OJTOP.oj_quest_complete_dialog()
+    findAllTxt4InteractWindow(0)
+end
 function OJTOP.oj_chatter_end()
     OJTOP.talkstatus = false
 end
+
 
 function findAllTxt4InteractWindow(maxOpt)
     if maxOpt == 0 then
@@ -287,6 +291,7 @@ function OJTOP:Initialize()
     EM:RegisterForEvent(OJTOP.name, EVENT_CHATTER_BEGIN, OJTOP.oj_chatter_begin) --npc講話
     EM:RegisterForEvent(OJTOP.name, EVENT_CONVERSATION_UPDATED, OJTOP.oj_conversation_updated) --npc繼續講話
     EM:RegisterForEvent(OJTOP.name, EVENT_QUEST_OFFERED , OJTOP.oj_quest_offered); --npc對話給予任務選項
+    EM:RegisterForEvent(OJTOP.name, EVENT_QUEST_COMPLETE_DIALOG , OJTOP.oj_quest_complete_dialog) --npc對話給予任務獎勵
     EM:RegisterForEvent(OJTOP.name, EVENT_CHATTER_END, OJTOP.oj_chatter_end) --npc對話結束
 
     -- 一堆 TopLevel 視窗問題
