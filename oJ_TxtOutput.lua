@@ -1,7 +1,7 @@
 OJTOP = {}
 OJTOP.ename = 'OJTOP'
 OJTOP.name = 'oJ_TxtOutput' -- sugar daddy
-OJTOP.version = '1.0.2'
+OJTOP.version = '1.0.3'
 OJTOP.init = false
 OJTOP.savedata = {}
 local WM = WINDOW_MANAGER
@@ -16,40 +16,161 @@ local init_savedef = {
 }
 local debug_mode = false
 
---npc講話
-function OJTOP.OnNpcTalk(eventCode, optionCount)
-    if OJTOP.savedata.status ~= true then return end
-    local maxOpt = optionCount + 1
-    findAllTxt4InteractWindow(maxOpt)
+OJTOP.talkstatus = false
+OJTOP.talkoptcount = 0
+
+-- 因為無法有正確的事件 取得對話選項的更新狀態 只好繼承 副寫 每一個 setText 
+local OriginTitleSet = ZO_InteractWindowTargetAreaTitle.SetText
+ZO_InteractWindowTargetAreaTitle.SetText = function (self, bodyText)
+    OriginTitleSet(self, bodyText)
+    OJTOP.talkoptcount = 0
 end
-function OJTOP.OnNpcTalk2(eventCode, conversationBodyText, conversationOptionCount)
-    if OJTOP.savedata.status ~= true then return end
-    local maxOpt = conversationOptionCount + 1
-    findAllTxt4InteractWindow(maxOpt)
+-- local OriginTitleSet = ZO_InteractWindowTargetAreaBodyText.SetText
+-- ZO_InteractWindowTargetAreaBodyText.SetText = function (self, bodyText)
+--     OriginBodySet(self, bodyText)
+-- end
+-- local OriginOpt_1_Set = ZO_ChatterOption1.SetText; ZO_ChatterOption1.SetText = function (self, bodyText) OriginOpt_1_Set(self, bodyText); OJTOP.talkoptcount = OJTOP.talkoptcount + 1; end
+-- local OriginOpt_2_Set = ZO_ChatterOption2.SetText; ZO_ChatterOption2.SetText = function (self, bodyText) OriginOpt_2_Set(self, bodyText); OJTOP.talkoptcount = OJTOP.talkoptcount + 1; end
+-- local OriginOpt_3_Set = ZO_ChatterOption3.SetText; ZO_ChatterOption3.SetText = function (self, bodyText) OriginOpt_3_Set(self, bodyText); OJTOP.talkoptcount = OJTOP.talkoptcount + 1; end
+-- local OriginOpt_4_Set = ZO_ChatterOption4.SetText; ZO_ChatterOption4.SetText = function (self, bodyText) OriginOpt_4_Set(self, bodyText); OJTOP.talkoptcount = OJTOP.talkoptcount + 1; end
+-- local OriginOpt_5_Set = ZO_ChatterOption5.SetText; ZO_ChatterOption5.SetText = function (self, bodyText) OriginOpt_5_Set(self, bodyText); OJTOP.talkoptcount = OJTOP.talkoptcount + 1; end
+-- local OriginOpt_6_Set = ZO_ChatterOption6.SetText; ZO_ChatterOption6.SetText = function (self, bodyText) OriginOpt_6_Set(self, bodyText); OJTOP.talkoptcount = OJTOP.talkoptcount + 1; end
+-- local OriginOpt_7_Set = ZO_ChatterOption7.SetText; ZO_ChatterOption7.SetText = function (self, bodyText) OriginOpt_7_Set(self, bodyText); OJTOP.talkoptcount = OJTOP.talkoptcount + 1; end
+-- local OriginOpt_8_Set = ZO_ChatterOption8.SetText; ZO_ChatterOption8.SetText = function (self, bodyText) OriginOpt_8_Set(self, bodyText); OJTOP.talkoptcount = OJTOP.talkoptcount + 1; end
+-- local OriginOpt_9_Set = ZO_ChatterOption9.SetText; ZO_ChatterOption9.SetText = function (self, bodyText) OriginOpt_9_Set(self, bodyText); OJTOP.talkoptcount = OJTOP.talkoptcount + 1; end
+-- local OriginOpt_10_Set = ZO_ChatterOption10.SetText; ZO_ChatterOption10.SetText = function (self, bodyText) OriginOpt_10_Set(self, bodyText); OJTOP.talkoptcount = OJTOP.talkoptcount + 1; end
+
+--npc講話 原本期待用事件判斷抓資料時間
+function OJTOP.oj_chatter_begin(eventCode, optionCount)
+    -- local maxOpt = optionCount + 1
+    -- findAllTxt4InteractWindow(maxOpt)
+    OJTOP.talkstatus = true
+    findAllTxt4InteractWindow(0)
 end
+function OJTOP.oj_conversation_updated(eventCode, conversationBodyText, conversationOptionCount)
+    -- local maxOpt = conversationOptionCount + 1
+    -- findAllTxt4InteractWindow(maxOpt)
+    findAllTxt4InteractWindow(0)
+end
+function OJTOP.oj_quest_offered()
+    findAllTxt4InteractWindow(0)
+end
+function OJTOP.oj_chatter_end()
+    OJTOP.talkstatus = false
+end
+
 function findAllTxt4InteractWindow(maxOpt)
-    if OJTOP.savedata.status ~= true then return end
+    if maxOpt == 0 then
+        maxOpt = OJTOP.talkoptcount
+    end
     -- title 
     local main = ":::  "..ZO_InteractWindowTargetAreaTitle:GetText().."  :::\n\n"
     -- body
     main = main..ZO_InteractWindowTargetAreaBodyText:GetText().."\n\n"
     -- option
-    if maxOpt >= 1 then main = main.."\n >> "..ZO_ChatterOption1:GetText() end
-    if maxOpt >= 2 then main = main.."\n >> "..ZO_ChatterOption2:GetText() end
-    if maxOpt >= 3 then main = main.."\n >> "..ZO_ChatterOption3:GetText() end
-    if maxOpt >= 4 then main = main.."\n >> "..ZO_ChatterOption4:GetText() end
-    if maxOpt >= 5 then main = main.."\n >> "..ZO_ChatterOption5:GetText() end
-    if maxOpt >= 6 then main = main.."\n >> "..ZO_ChatterOption6:GetText() end
-    if maxOpt >= 7 then main = main.."\n >> "..ZO_ChatterOption7:GetText() end
-    if maxOpt >= 8 then main = main.."\n >> "..ZO_ChatterOption8:GetText() end
-    if maxOpt >= 9 then main = main.."\n >> "..ZO_ChatterOption9:GetText() end
-    if maxOpt >= 10 then main = main.."\n >> "..ZO_ChatterOption10:GetText() end
+    if ZO_ChatterOption1:IsHidden() == false then main = main.."\n >> "..ZO_ChatterOption1:GetText() end
+    if ZO_ChatterOption2:IsHidden() == false then main = main.."\n >> "..ZO_ChatterOption2:GetText() end
+    if ZO_ChatterOption3:IsHidden() == false then main = main.."\n >> "..ZO_ChatterOption3:GetText() end
+    if ZO_ChatterOption4:IsHidden() == false then main = main.."\n >> "..ZO_ChatterOption4:GetText() end
+    if ZO_ChatterOption5:IsHidden() == false then main = main.."\n >> "..ZO_ChatterOption5:GetText() end
+    if ZO_ChatterOption6:IsHidden() == false then main = main.."\n >> "..ZO_ChatterOption6:GetText() end
+    if ZO_ChatterOption7:IsHidden() == false then main = main.."\n >> "..ZO_ChatterOption7:GetText() end
+    if ZO_ChatterOption8:IsHidden() == false then main = main.."\n >> "..ZO_ChatterOption8:GetText() end
+    if ZO_ChatterOption9:IsHidden() == false then main = main.."\n >> "..ZO_ChatterOption9:GetText() end
+    if ZO_ChatterOption10:IsHidden() == false then main = main.."\n >> "..ZO_ChatterOption10:GetText() end
+    main = main.."\n\n\n"
 
     OJTOP:showTxt2Box(main)
 end
+
+
+-- 任務
+local OriginQJTitleSet = ZO_QuestJournalTitleText.SetText
+ZO_QuestJournalTitleText.SetText = function (self, bodyText)
+    OriginQJTitleSet(self, bodyText)
+    OJTOP.talkoptcount = 0
+    zo_callLater(findAllTxt4QuestJournal, 100)
+    -- d( '===============================' )
+end
+-- local OriginQJStepSet = ZO_QuestJournalStepText.SetText
+-- ZO_QuestJournalStepText.SetText = function (self, bodyText)
+--     OriginQJStepSet(self, bodyText)
+-- end
+-- local OriginQJBGSet = ZO_QuestJournalBGText.SetText
+-- ZO_QuestJournalBGText.SetText = function (self, bodyText)
+--     OriginQJBGSet(self, bodyText)
+-- end
+function cancelc666(str)
+    str = string.gsub(str, "|c666666", "")
+    str = string.gsub(str, "|r", "")
+    return str
+end
+function findAllTxt4QuestJournal()
+    maxOpt = OJTOP.talkoptcount
+    -- title 
+    local main = ":::  "..ZO_QuestJournalTitleText:GetText().."  :::\n\n"
+    -- body
+    main = main..ZO_QuestJournalBGText:GetText().."\n\n"
+    main = main..ZO_QuestJournalStepText:GetText().."\n\n"
+    -- tasks
+    if ZO_QuestJournalConditionTextBulletListLabel1 then 
+        if ZO_QuestJournalConditionTextBulletListLabel1:IsHidden() == false then
+            main = main.."\n >> "..cancelc666( ZO_QuestJournalConditionTextBulletListLabel1:GetText() )
+        end
+    end
+    if ZO_QuestJournalConditionTextBulletListLabel2 then 
+        if ZO_QuestJournalConditionTextBulletListLabel2:IsHidden() == false then
+            main = main.."\n >> "..cancelc666( ZO_QuestJournalConditionTextBulletListLabel2:GetText() )
+        end
+    end
+    if ZO_QuestJournalConditionTextBulletListLabel3 then 
+        if ZO_QuestJournalConditionTextBulletListLabel3:IsHidden() == false then
+            main = main.."\n >> "..cancelc666( ZO_QuestJournalConditionTextBulletListLabel3:GetText() )
+        end
+    end
+    if ZO_QuestJournalConditionTextBulletListLabel4 then 
+        if ZO_QuestJournalConditionTextBulletListLabel4:IsHidden() == false then
+            main = main.."\n >> "..cancelc666( ZO_QuestJournalConditionTextBulletListLabel4:GetText() )
+        end
+    end
+    if ZO_QuestJournalConditionTextBulletListLabel5 then 
+        if ZO_QuestJournalConditionTextBulletListLabel5:IsHidden() == false then
+            main = main.."\n >> "..cancelc666( ZO_QuestJournalConditionTextBulletListLabel5:GetText() )
+        end
+    end
+    -- option
+    if ZO_QuestJournalOptionalStepTextBulletListLabel1 then 
+        if ZO_QuestJournalOptionalStepTextBulletListLabel1:IsHidden() == false then
+            main = main.."\n\n\n >> "..ZO_QuestJournalOptionalStepTextBulletListLabel1:GetText()
+        end
+    end
+    if ZO_QuestJournalOptionalStepTextBulletListLabel2 then 
+        if ZO_QuestJournalOptionalStepTextBulletListLabel2:IsHidden() == false then
+            main = main.."\n >> "..ZO_QuestJournalOptionalStepTextBulletListLabel2:GetText()
+        end
+    end
+    if ZO_QuestJournalOptionalStepTextBulletListLabel3 then 
+        if ZO_QuestJournalOptionalStepTextBulletListLabel3:IsHidden() == false then
+            main = main.."\n >> "..ZO_QuestJournalOptionalStepTextBulletListLabel3:GetText()
+        end
+    end
+    if ZO_QuestJournalOptionalStepTextBulletListLabel4 then 
+        if ZO_QuestJournalOptionalStepTextBulletListLabel4:IsHidden() == false then
+            main = main.."\n >> "..ZO_QuestJournalOptionalStepTextBulletListLabel4:GetText()
+        end
+    end
+    if ZO_QuestJournalOptionalStepTextBulletListLabel5 then 
+        if ZO_QuestJournalOptionalStepTextBulletListLabel5:IsHidden() == false then
+            main = main.."\n >> "..ZO_QuestJournalOptionalStepTextBulletListLabel5:GetText()
+        end
+    end
+    main = main.."\n\n\n"
+
+    OJTOP:showTxt2Box(main)
+end
+
 -- 即時開書
 function OJTOP.OnShowBook(eventCode, title, body, medium, showTitle)
-    if OJTOP.savedata.status ~= true then return end
     local main = ":::  "..title.."  :::\n\n\n"..body
     OJTOP:showTxt2Box(main)
 end
@@ -57,7 +178,6 @@ end
 local Origin_LoreLibrary_ReadBook = ZO_LoreLibrary_ReadBook
 ZO_LoreLibrary_ReadBook = function (categoryIndex, collectionIndex, bookIndex)
     Origin_LoreLibrary_ReadBook(categoryIndex, collectionIndex, bookIndex)
-    if OJTOP.savedata.status ~= true then return end
     local title = GetLoreBookInfo(categoryIndex, collectionIndex, bookIndex)
     local body, medium, showTitle = ReadLoreBook(categoryIndex, collectionIndex, bookIndex)
 
@@ -68,10 +188,11 @@ ZO_LoreLibrary_ReadBook = function (categoryIndex, collectionIndex, bookIndex)
     OJTOP:showTxt2Box(main)
 end
 function OJTOP:showTxt2Box(main)
-    if OJTOP.savedata.status ~= true then return end
     OJTOPPanelViewOutputBoxTxtBox:Clear()
     OJTOPPanelViewOutputBoxTxtBox:SetText(main)
-    OJTOP.toggleOJTOPPanelView(1);
+    if OJTOP.savedata.status == true then
+        OJTOP.toggleOJTOPPanelView(1);
+    end
 end
 -- 硬讀書
 function OJTOP.ShowFilterBook()
@@ -147,7 +268,6 @@ function OJTOP.conmoveOJTOPStatusView(status)
         WM:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
     end
 end
-
 ----------------------------------------
 -- INIT
 ----------------------------------------
@@ -159,15 +279,18 @@ function OJTOP:Initialize()
     
     -- key bind controls
     ZO_CreateStringId("SI_BINDING_NAME_SHOW_OJTOPPanelView", "toggle ui")
-    ZO_CreateStringId("SI_BINDING_NAME_STATUS_OJTOPPanelView", "enable/desable ui")
+    ZO_CreateStringId("SI_BINDING_NAME_STATUS_OJTOPPanelView", "auto on/off")
 
     -- 事件綁定
     EM:RegisterForEvent(OJTOP.name, EVENT_SHOW_BOOK, OJTOP.OnShowBook) --即時打開書本
-    EM:RegisterForEvent(OJTOP.name, EVENT_CHATTER_BEGIN, OJTOP.OnNpcTalk) --npc講話
-    EM:RegisterForEvent(OJTOP.name, EVENT_CONVERSATION_UPDATED, OJTOP.OnNpcTalk2) --npc繼續講話
+    -- 以下4個事件 都在 ui 文字貼好才觸發 , 無法判斷我想要的 選項數量 只能改用 繼承的方式處理
+    EM:RegisterForEvent(OJTOP.name, EVENT_CHATTER_BEGIN, OJTOP.oj_chatter_begin) --npc講話
+    EM:RegisterForEvent(OJTOP.name, EVENT_CONVERSATION_UPDATED, OJTOP.oj_conversation_updated) --npc繼續講話
+    EM:RegisterForEvent(OJTOP.name, EVENT_QUEST_OFFERED , OJTOP.oj_quest_offered); --npc對話給予任務選項
+    EM:RegisterForEvent(OJTOP.name, EVENT_CHATTER_END, OJTOP.oj_chatter_end) --npc對話結束
 
     -- 一堆 TopLevel 視窗問題
-    EM:RegisterForEvent(self.ename,EVENT_NEW_MOVEMENT_IN_UI_MODE, function() OJTOP.toggleOJTOPPanelView(0) end)
+    EM:RegisterForEvent(OJTOP.ename,EVENT_NEW_MOVEMENT_IN_UI_MODE, function() OJTOP.toggleOJTOPPanelView(0) end)
     ZO_PreHookHandler(OJTOPStatusView,'OnMouseEnter', function() OJTOP.conmoveOJTOPStatusView(1) end)
     ZO_PreHookHandler(OJTOPStatusView,'OnMouseExit', function() OJTOP.conmoveOJTOPStatusView(0) end)
 
