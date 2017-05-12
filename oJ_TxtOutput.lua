@@ -17,6 +17,7 @@ local init_savedef = {
 local debug_mode = false
 
 OJTOP.talkstatus = false
+OJTOP.queststatus = false
 OJTOP.talkoptcount = 0
 
 -- 因為無法有正確的事件 取得對話選項的更新狀態 只好繼承 副寫 每一個 setText 
@@ -60,6 +61,7 @@ function OJTOP.oj_quest_complete_dialog()
 end
 function OJTOP.oj_chatter_end()
     OJTOP.talkstatus = false
+    OJTOP.toggleOJTOPPanelView(0);
 end
 
 
@@ -110,6 +112,8 @@ function cancelc666(str)
     return str
 end
 function findAllTxt4QuestJournal()
+    if OJTOP.queststatus == false then return end
+
     maxOpt = OJTOP.talkoptcount
     -- title 
     local main = ":::  "..ZO_QuestJournalTitleText:GetText().."  :::\n\n"
@@ -298,6 +302,8 @@ function OJTOP:Initialize()
     EM:RegisterForEvent(OJTOP.ename,EVENT_NEW_MOVEMENT_IN_UI_MODE, function() OJTOP.toggleOJTOPPanelView(0) end)
     ZO_PreHookHandler(OJTOPStatusView,'OnMouseEnter', function() OJTOP.conmoveOJTOPStatusView(1) end)
     ZO_PreHookHandler(OJTOPStatusView,'OnMouseExit', function() OJTOP.conmoveOJTOPStatusView(0) end)
+    ZO_PreHookHandler(ZO_QuestJournal,'OnShow', function() OJTOP.queststatus = true end)
+    ZO_PreHookHandler(ZO_QuestJournal,'OnHide', function() OJTOP.queststatus = false; OJTOP.toggleOJTOPPanelView(0); end)
 
     -- default run func
     OJTOP:OnUiPosLoad()
