@@ -1,7 +1,8 @@
 OJTOP = {}
 OJTOP.ename = 'OJTOP'
 OJTOP.name = 'oJ_TxtOutput' -- sugar daddy
-OJTOP.version = '1.0.4'
+OJTOP.author = 'oJelly'
+OJTOP.version = '1.0.6'
 OJTOP.init = false
 OJTOP.savedata = {}
 local WM = WINDOW_MANAGER
@@ -10,7 +11,8 @@ local SM = SCENE_MANAGER
 local CM = CALLBACK_MANAGER
 local strformat = zo_strformat
 local init_savedef = {
-    status = true,
+    status = true, --auto show status
+    aleryuistatus = true, --icon show status
     mainbox_pos = {70,120},
     statusicon_pos = {20,20},
 }
@@ -19,6 +21,8 @@ local debug_mode = false
 OJTOP.talkstatus = false
 OJTOP.queststatus = false
 OJTOP.talkoptcount = 0
+
+local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 
 -- 因為無法有正確的事件 取得對話選項的更新狀態 只好繼承 副寫 每一個 setText 
 local OriginTitleSet = ZO_InteractWindowTargetAreaTitle.SetText
@@ -227,10 +231,10 @@ function OJTOP:OnUiPosLoad()
     OJTOPPanelView:ClearAnchors()
     OJTOPPanelView:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, OJTOP.savedata.mainbox_pos[0], OJTOP.savedata.mainbox_pos[1])
 
-    if OJTOP.savedata.status == false then
-        OJTOPStatusView:SetHidden(false)
+    if OJTOP.savedata.status == false and OJTOP.savedata.aleryuistatus == true then
+        OJTOP.toggleOJTOPStatusView(1)
     else
-        OJTOPStatusView:SetHidden(true)
+        OJTOP.toggleOJTOPStatusView(0)
     end
     OJTOPStatusView:ClearAnchors()
     OJTOPStatusView:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, OJTOP.savedata.statusicon_pos[0], OJTOP.savedata.statusicon_pos[1])
@@ -245,7 +249,7 @@ function OJTOP.OnUiPosSave(tag)
         OJTOP.savedata.statusicon_pos[1] = OJTOPStatusView:GetTop()
     end
 end
-function OJTOP.toggleOJTOPPanelView(open)
+function OJTOP.toggleOJTOPPanelView(open) 
     if open == nil then
         SM:ToggleTopLevel(OJTOPPanelView)
     elseif open == 1 then
@@ -261,9 +265,24 @@ function OJTOP.statusOJTOPPanelView()
         OJTOP.savedata.status = true
     end
 
-    if OJTOP.savedata.status == false then
-        OJTOPStatusView:SetHidden(false)
+    if OJTOP.savedata.status == false and OJTOP.savedata.aleryuistatus == true then
+        OJTOP.toggleOJTOPStatusView(1)
     else
+        OJTOP.toggleOJTOPStatusView(0)
+    end
+end
+function OJTOP.toggleOJTOPStatusView(open)
+    if open == nil then
+        if OJTOP.savedata.aleryuistatus == true then
+            OJTOP.savedata.aleryuistatus = false
+            OJTOPStatusView:SetHidden(true)
+        else
+            OJTOP.savedata.aleryuistatus = true
+            OJTOPStatusView:SetHidden(false)
+        end
+    elseif open == 1 then
+        OJTOPStatusView:SetHidden(false)
+    elseif open == 0 then
         OJTOPStatusView:SetHidden(true)
     end
 end
@@ -277,6 +296,47 @@ function OJTOP.conmoveOJTOPStatusView(status)
     end
 end
 ----------------------------------------
+-- setting
+----------------------------------------
+local function createLAM2Panel()
+    local panelData = {
+        type = "panel",
+        name = 'TxtOutput',
+        displayName = ZO_HIGHLIGHT_TEXT:Colorize('TxtOutput'),
+        author = "|cFFAA33"..OJTOP.author.."|r",
+        version = OJTOP.version,
+        registerForRefresh = true,
+    }
+    local optionsData = {
+        [1] = {
+            type = "checkbox",
+            name = 'auto show on/off',
+            tooltip = 'auto show UI : book/quest/talk',
+            getFunc = function() 
+                return OJTOP.savedata.status
+            end,
+            setFunc = function(val) 
+                OJTOP.statusOJTOPPanelView()
+            end,
+            default = OJTOP.savedata.status,
+        },
+        [2] = {
+            type = "checkbox",
+            name = 'show status ui',
+            tooltip = 'show the status ui when you trun off auto show',
+            getFunc = function() 
+                return OJTOP.savedata.aleryuistatus
+            end,
+            setFunc = function(val) 
+                OJTOP.toggleOJTOPStatusView(open)
+            end,
+            default = OJTOP.savedata.aleryuistatus,
+        },
+    }
+    local myPanel = LAM2:RegisterAddonPanel(OJTOP.name.."LAM2Options", panelData)
+    LAM2:RegisterOptionControls(OJTOP.name.."LAM2Options", optionsData)
+end
+----------------------------------------
 -- INIT
 ----------------------------------------
 function OJTOP:Initialize()
@@ -287,7 +347,7 @@ function OJTOP:Initialize()
     
     -- key bind controls
     ZO_CreateStringId("SI_BINDING_NAME_SHOW_OJTOPPanelView", "toggle ui")
-    ZO_CreateStringId("SI_BINDING_NAME_STATUS_OJTOPPanelView", "auto on/off")
+    ZO_CreateStringId("SI_BINDING_NAME_STATUS_OJTOPPanelView", "auto show on/off")
 
     -- 事件綁定
     EM:RegisterForEvent(OJTOP.name, EVENT_SHOW_BOOK, OJTOP.OnShowBook) --即時打開書本
@@ -307,6 +367,8 @@ function OJTOP:Initialize()
 
     -- default run func
     OJTOP:OnUiPosLoad()
+    -- setting page
+    createLAM2Panel()
 
     SLASH_COMMANDS["/ojtoptest"] = function()
         d(OJTOP.savedata.status)

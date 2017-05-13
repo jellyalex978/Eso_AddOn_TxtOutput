@@ -1,6 +1,6 @@
-## Title: |cFF9900TxtOutput|r 1.0.4
+## Title: |cFF9900TxtOutput|r 1.0.6
 ## APIVersion: 100018
-## Version: 1.0.4
+## Version: 1.0.6
 ## Author: oJelly
 ## Description: This addon allows you to Output talk txt and book txt
 ## SavedVariables: OJTOP_savedata
@@ -22,6 +22,23 @@
 ## @Rhyono
 ## AwesomeGuildStore IIfA AlphaGear
 ## 
+
+Libs\LibStub\LibStub.lua
+Libs\LibAddonMenu-2.0\LibAddonMenu-2.0.lua
+Libs\LibAddonMenu-2.0\controls\panel.lua
+Libs\LibAddonMenu-2.0\controls\submenu.lua
+Libs\LibAddonMenu-2.0\controls\button.lua
+Libs\LibAddonMenu-2.0\controls\checkbox.lua
+Libs\LibAddonMenu-2.0\controls\colorpicker.lua
+Libs\LibAddonMenu-2.0\controls\custom.lua
+Libs\LibAddonMenu-2.0\controls\description.lua
+Libs\LibAddonMenu-2.0\controls\dropdown.lua
+Libs\LibAddonMenu-2.0\controls\editbox.lua
+Libs\LibAddonMenu-2.0\controls\header.lua
+Libs\LibAddonMenu-2.0\controls\slider.lua
+Libs\LibAddonMenu-2.0\controls\texture.lua
+Libs\LibAddonMenu-2.0\controls\iconpicker.lua
+Libs\LibAddonMenu-2.0\controls\divider.lua
 
 oJ_TxtOutput.lua
 oJ_TxtOutput.xml
