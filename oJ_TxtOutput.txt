@@ -1,6 +1,6 @@
-## Title: |cFF9900TxtOutput|r 1.0.6
+## Title: |cFF9900TxtOutput|r 1.1.0
 ## APIVersion: 100018
-## Version: 1.0.6
+## Version: 1.1.0
 ## Author: oJelly
 ## Description: This addon allows you to Output talk txt and book txt
 ## SavedVariables: OJTOP_savedata

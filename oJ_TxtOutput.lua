@@ -2,7 +2,7 @@ OJTOP = {}
 OJTOP.ename = 'OJTOP'
 OJTOP.name = 'oJ_TxtOutput' -- sugar daddy
 OJTOP.author = 'oJelly'
-OJTOP.version = '1.0.6'
+OJTOP.version = '1.1.0'
 OJTOP.init = false
 OJTOP.savedata = {}
 local WM = WINDOW_MANAGER
@@ -64,8 +64,10 @@ function OJTOP.oj_quest_complete_dialog()
     findAllTxt4InteractWindow(0)
 end
 function OJTOP.oj_chatter_end()
-    OJTOP.talkstatus = false
-    OJTOP.toggleOJTOPPanelView(0);
+    if OJTOP.talkstatus then
+        OJTOP.talkstatus = false
+        OJTOP.toggleOJTOPPanelView(0);
+    end
 end
 
 
