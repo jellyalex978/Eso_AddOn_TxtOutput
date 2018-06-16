@@ -2,7 +2,7 @@ OJTOP = {}
 OJTOP.ename = 'OJTOP'
 OJTOP.name = 'oJ_TxtOutput' -- sugar daddy
 OJTOP.author = 'oJelly'
-OJTOP.version = '1.1.1'
+OJTOP.version = '1.2.1'
 OJTOP.init = false
 OJTOP.savedata = {}
 local WM = WINDOW_MANAGER
@@ -67,6 +67,15 @@ function OJTOP.oj_chatter_end()
     if OJTOP.talkstatus then
         OJTOP.talkstatus = false
         OJTOP.toggleOJTOPPanelView(0);
+    end
+end
+function OJTOP.oj_subtitle_show(eventCode,MsgType,speakerName,text)
+    if OJTOP.savedata.subtitlechat then
+        -- format
+        npc = zo_strformat("|c00C000<<1>>|r", speakerName);
+        msg = zo_strformat("|cf0f0f0<<1>>|r", text);
+        -- output
+        CHAT_SYSTEM:AddMessage(npc .. ' : ' .. msg)
     end
 end
 
@@ -298,6 +307,12 @@ function OJTOP.conmoveOJTOPStatusView(status)
     end
 end
 ----------------------------------------
+-- test
+----------------------------------------
+function OJTOP.oJTxtOutputTest()
+    
+end
+----------------------------------------
 -- setting
 ----------------------------------------
 local function createLAM2Panel()
@@ -334,6 +349,18 @@ local function createLAM2Panel()
             end,
             default = OJTOP.savedata.aleryuistatus,
         },
+        [3] = {
+            type = "checkbox",
+            name = 'show Subtitle on CHAT',
+            tooltip = 'show Subtitle on CHAT, you can install addon : Chat2Clipboard to copy it',
+            getFunc = function() 
+                return OJTOP.savedata.subtitlechat
+            end,
+            setFunc = function(val) 
+                OJTOP.savedata.subtitlechat = val
+            end,
+            default = OJTOP.savedata.subtitlechat,
+        },
     }
     local myPanel = LAM2:RegisterAddonPanel(OJTOP.name.."LAM2Options", panelData)
     LAM2:RegisterOptionControls(OJTOP.name.."LAM2Options", optionsData)
@@ -360,6 +387,8 @@ function OJTOP:Initialize()
     EM:RegisterForEvent(OJTOP.name, EVENT_QUEST_COMPLETE_DIALOG , OJTOP.oj_quest_complete_dialog) --npc對話給予任務獎勵
     EM:RegisterForEvent(OJTOP.name, EVENT_CHATTER_END, OJTOP.oj_chatter_end) --npc對話結束
 
+    EM:RegisterForEvent(OJTOP.name, EVENT_SHOW_SUBTITLE, OJTOP.oj_subtitle_show) --字幕出現
+
     -- 一堆 TopLevel 視窗問題
     EM:RegisterForEvent(OJTOP.ename,EVENT_NEW_MOVEMENT_IN_UI_MODE, function() OJTOP.toggleOJTOPPanelView(0) end)
     ZO_PreHookHandler(OJTOPStatusView,'OnMouseEnter', function() OJTOP.conmoveOJTOPStatusView(1) end)
@@ -373,21 +402,12 @@ function OJTOP:Initialize()
     createLAM2Panel()
 
     SLASH_COMMANDS["/ojtoptest"] = function()
-        d(OJTOP.savedata.status)
-        d('===================')
-    end
-    SLASH_COMMANDS["/ojtopinit"] = function()
-        d('Initialize')
+        OJTOP.oJTxtOutputTest()
     end
 end
 function OJTOP.OnAddOnLoaded(event, addonName)
     if addonName ~= OJTOP.name then return end
-
     EM:UnregisterForEvent(OJTOP.ename,EVENT_ADD_ON_LOADED)
     OJTOP:Initialize()
-
-    SLASH_COMMANDS["/ojtop"] = function()
-        d('OnAddOnLoaded')
-    end
 end
 EM:RegisterForEvent(OJTOP.ename, EVENT_ADD_ON_LOADED, OJTOP.OnAddOnLoaded);
