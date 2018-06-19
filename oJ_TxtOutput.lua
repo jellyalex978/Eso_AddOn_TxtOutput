@@ -2,7 +2,7 @@ OJTOP = {}
 OJTOP.ename = 'OJTOP'
 OJTOP.name = 'oJ_TxtOutput' -- sugar daddy
 OJTOP.author = 'oJelly'
-OJTOP.version = '1.2.1'
+OJTOP.version = '1.3.1'
 OJTOP.init = false
 OJTOP.savedata = {}
 local WM = WINDOW_MANAGER
@@ -11,16 +11,18 @@ local SM = SCENE_MANAGER
 local CM = CALLBACK_MANAGER
 local strformat = zo_strformat
 local init_savedef = {
-    status = true, --auto show status
-    aleryuistatus = true, --icon show status
+    -- aleryuistatus = true, --icon show status
+    autoshowstatus = true, --auto show status
+    autoshowsubtitle = true, --auto show subtitles
     mainbox_pos = {70,120},
     statusicon_pos = {20,20},
 }
 local debug_mode = false
-
 OJTOP.talkstatus = false
 OJTOP.queststatus = false
 OJTOP.talkoptcount = 0
+OJTOP.showingtype = 0 -- 0非subtitle , 5 subtitle
+OJTOP.withoutCombat  = true --就算有開自動顯示 戰鬥中也不秀
 
 local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
 
@@ -70,6 +72,21 @@ function OJTOP.oj_chatter_end()
     end
 end
 function OJTOP.oj_subtitle_show(eventCode,MsgType,speakerName,text)
+    local lastmsg = ''
+    if OJTOP.showingtype == 5 then
+        lastmsg = OJTOPPanelViewOutputBoxTxtBox:GetText()
+        if lastmsg ~= '' then
+            lastmsg = lastmsg.."\n\n"
+        end
+    end
+    OJTOP.showingtype = 5
+    
+    npc = zo_strformat("<<1>>", speakerName);
+    msg = zo_strformat("<<1>>", text);
+    main = lastmsg .. npc .. " : \n" .. msg
+    OJTOP:showTxt2Box(main)
+    
+
     if OJTOP.savedata.subtitlechat then
         -- format
         npc = zo_strformat("|c00C000<<1>>|r", speakerName);
@@ -101,6 +118,7 @@ function findAllTxt4InteractWindow(maxOpt)
     if ZO_ChatterOption10:IsHidden() == false then main = main.."\n >> "..ZO_ChatterOption10:GetText() end
     main = main.."\n\n\n"
 
+    OJTOP.showingtype = 0
     OJTOP:showTxt2Box(main)
 end
 
@@ -189,12 +207,22 @@ function findAllTxt4QuestJournal()
     end
     main = main.."\n\n\n"
 
+    OJTOP.showingtype = 0
     OJTOP:showTxt2Box(main)
 end
 
+-- 戰鬥判斷
+function OJTOP.OnPlayerCombatState(event, inCombat)
+    if inCombat then
+        OJTOP.withoutCombat = false;
+    else
+        OJTOP.withoutCombat = true;
+    end
+end
 -- 即時開書
 function OJTOP.OnShowBook(eventCode, title, body, medium, showTitle)
     local main = ":::  "..title.."  :::\n\n\n"..body
+    OJTOP.showingtype = 0
     OJTOP:showTxt2Box(main)
 end
 -- j 介面開書
@@ -208,13 +236,22 @@ ZO_LoreLibrary_ReadBook = function (categoryIndex, collectionIndex, bookIndex)
     main = main.." -- ("..categoryIndex.." , "..collectionIndex.." , "..bookIndex..") \n\n"
     main = main..body
 
+    OJTOP.showingtype = 0
     OJTOP:showTxt2Box(main)
 end
 function OJTOP:showTxt2Box(main)
     OJTOPPanelViewOutputBoxTxtBox:Clear()
     OJTOPPanelViewOutputBoxTxtBox:SetText(main)
-    if OJTOP.savedata.status == true then
-        OJTOP.toggleOJTOPPanelView(1);
+    if OJTOP.showingtype == 5 then
+        if OJTOP.savedata.autoshowsubtitle == true then
+            if OJTOP.withoutCombat == true then
+                OJTOP.toggleOJTOPPanelView(1);
+            end
+        end
+    else
+        if OJTOP.savedata.autoshowstatus == true then
+            OJTOP.toggleOJTOPPanelView(1);
+        end
     end
 end
 -- 硬讀書
@@ -228,9 +265,12 @@ function OJTOP.ShowFilterBook()
         local body, medium, showTitle = ReadLoreBook(category_i, collection_i, book_i)
 
         local main = ":::  "..title.."  :::\n\n\n"..body
+        OJTOP.showingtype = 0
         OJTOP:showTxt2Box(main)
     else
+
         local main = "please input 3 input val"
+        OJTOP.showingtype = 0
         OJTOP:showTxt2Box(main)
     end
 end
@@ -242,23 +282,23 @@ function OJTOP:OnUiPosLoad()
     OJTOPPanelView:ClearAnchors()
     OJTOPPanelView:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, OJTOP.savedata.mainbox_pos[0], OJTOP.savedata.mainbox_pos[1])
 
-    if OJTOP.savedata.status == false and OJTOP.savedata.aleryuistatus == true then
-        OJTOP.toggleOJTOPStatusView(1)
-    else
-        OJTOP.toggleOJTOPStatusView(0)
-    end
-    OJTOPStatusView:ClearAnchors()
-    OJTOPStatusView:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, OJTOP.savedata.statusicon_pos[0], OJTOP.savedata.statusicon_pos[1])
+    -- if OJTOP.savedata.autoshowstatus == false then
+    --     OJTOP.toggleOJTOPStatusView(1)
+    -- else
+    --     OJTOP.toggleOJTOPStatusView(0)
+    -- end
+    -- OJTOPStatusView:ClearAnchors()
+    -- OJTOPStatusView:SetAnchor(TOPLEFT, GuiRoot, TOPLEFT, OJTOP.savedata.statusicon_pos[0], OJTOP.savedata.statusicon_pos[1])
 end
 function OJTOP.OnUiPosSave(tag)
     if tag == 'OJTOPPanelView' then
         OJTOP.savedata.mainbox_pos[0] = OJTOPPanelView:GetLeft()
         OJTOP.savedata.mainbox_pos[1] = OJTOPPanelView:GetTop()
     end
-    if tag == 'OJTOPStatusView' then
-        OJTOP.savedata.statusicon_pos[0] = OJTOPStatusView:GetLeft()
-        OJTOP.savedata.statusicon_pos[1] = OJTOPStatusView:GetTop()
-    end
+    -- if tag == 'OJTOPStatusView' then
+    --     OJTOP.savedata.statusicon_pos[0] = OJTOPStatusView:GetLeft()
+    --     OJTOP.savedata.statusicon_pos[1] = OJTOPStatusView:GetTop()
+    -- end
 end
 function OJTOP.toggleOJTOPPanelView(open) 
     if open == nil then
@@ -270,41 +310,41 @@ function OJTOP.toggleOJTOPPanelView(open)
     end
 end
 function OJTOP.statusOJTOPPanelView()
-    if OJTOP.savedata.status == true then
-        OJTOP.savedata.status = false
+    if OJTOP.savedata.autoshowstatus == true then
+        OJTOP.savedata.autoshowstatus = false
     else
-        OJTOP.savedata.status = true
+        OJTOP.savedata.autoshowstatus = true
     end
 
-    if OJTOP.savedata.status == false and OJTOP.savedata.aleryuistatus == true then
-        OJTOP.toggleOJTOPStatusView(1)
-    else
-        OJTOP.toggleOJTOPStatusView(0)
-    end
+    -- if OJTOP.savedata.autoshowstatus == false then
+    --     OJTOP.toggleOJTOPStatusView(1)
+    -- else
+    --     OJTOP.toggleOJTOPStatusView(0)
+    -- end
 end
 function OJTOP.toggleOJTOPStatusView(open)
-    if open == nil then
-        if OJTOP.savedata.aleryuistatus == true then
-            OJTOP.savedata.aleryuistatus = false
-            OJTOPStatusView:SetHidden(true)
-        else
-            OJTOP.savedata.aleryuistatus = true
-            OJTOPStatusView:SetHidden(false)
-        end
-    elseif open == 1 then
-        OJTOPStatusView:SetHidden(false)
-    elseif open == 0 then
-        OJTOPStatusView:SetHidden(true)
-    end
+    -- if open == nil then
+    --     if OJTOP.savedata.aleryuistatus == true then
+    --         OJTOP.savedata.aleryuistatus = false
+    --         OJTOPStatusView:SetHidden(true)
+    --     else
+    --         OJTOP.savedata.aleryuistatus = true
+    --         OJTOPStatusView:SetHidden(false)
+    --     end
+    -- elseif open == 1 then
+    --     OJTOPStatusView:SetHidden(false)
+    -- elseif open == 0 then
+    --     OJTOPStatusView:SetHidden(true)
+    -- end
 end
 function OJTOP.conmoveOJTOPStatusView(status)
-    if status == 1 then
-        OJTOPStatusViewBg:SetCenterColor(255,0,0,1)
-        WM:SetMouseCursor(MOUSE_CURSOR_PAN)
-    elseif status == 0 then
-        OJTOPStatusViewBg:SetCenterColor(0,0,0,1)
-        WM:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
-    end
+    -- if status == 1 then
+    --     OJTOPStatusViewBg:SetCenterColor(255,0,0,1)
+    --     WM:SetMouseCursor(MOUSE_CURSOR_PAN)
+    -- elseif status == 0 then
+    --     OJTOPStatusViewBg:SetCenterColor(0,0,0,1)
+    --     WM:SetMouseCursor(MOUSE_CURSOR_DO_NOT_CARE)
+    -- end
 end
 ----------------------------------------
 -- test
@@ -325,29 +365,41 @@ local function createLAM2Panel()
         registerForRefresh = true,
     }
     local optionsData = {
+        -- [1] = {
+        --     type = "checkbox",
+        --     name = 'show TxtOutput status icon',
+        --     tooltip = 'show the status ui when you trun off auto show',
+        --     getFunc = function() 
+        --         return OJTOP.savedata.aleryuistatus
+        --     end,
+        --     setFunc = function(val) 
+        --         OJTOP.toggleOJTOPStatusView(open)
+        --     end,
+        --     default = OJTOP.savedata.aleryuistatus,
+        -- },
         [1] = {
             type = "checkbox",
-            name = 'auto show on/off',
-            tooltip = 'auto show UI : book/quest/talk',
+            name = 'auto show book/quest/talk',
+            tooltip = 'auto show TxtOutput with book/quest/talk UI',
             getFunc = function() 
-                return OJTOP.savedata.status
+                return OJTOP.savedata.autoshowstatus
             end,
             setFunc = function(val) 
                 OJTOP.statusOJTOPPanelView()
             end,
-            default = OJTOP.savedata.status,
+            default = OJTOP.savedata.autoshowstatus,
         },
         [2] = {
             type = "checkbox",
-            name = 'show status ui',
-            tooltip = 'show the status ui when you trun off auto show',
+            name = 'auto show Subtitle',
+            tooltip = 'auto show TxtOutput when subtitles update',
             getFunc = function() 
-                return OJTOP.savedata.aleryuistatus
+                return OJTOP.savedata.autoshowsubtitle
             end,
             setFunc = function(val) 
-                OJTOP.toggleOJTOPStatusView(open)
+                OJTOP.savedata.autoshowsubtitle = val
             end,
-            default = OJTOP.savedata.aleryuistatus,
+            default = OJTOP.savedata.autoshowsubtitle,
         },
         [3] = {
             type = "checkbox",
@@ -360,7 +412,7 @@ local function createLAM2Panel()
                 OJTOP.savedata.subtitlechat = val
             end,
             default = OJTOP.savedata.subtitlechat,
-        },
+        }
     }
     local myPanel = LAM2:RegisterAddonPanel(OJTOP.name.."LAM2Options", panelData)
     LAM2:RegisterOptionControls(OJTOP.name.."LAM2Options", optionsData)
@@ -376,9 +428,9 @@ function OJTOP:Initialize()
     
     -- key bind controls
     ZO_CreateStringId("SI_BINDING_NAME_SHOW_OJTOPPanelView", "toggle ui")
-    ZO_CreateStringId("SI_BINDING_NAME_STATUS_OJTOPPanelView", "auto show on/off")
 
     -- 事件綁定
+    EM:RegisterForEvent(OJTOP.name, EVENT_PLAYER_COMBAT_STATE, OJTOP.OnPlayerCombatState)
     EM:RegisterForEvent(OJTOP.name, EVENT_SHOW_BOOK, OJTOP.OnShowBook) --即時打開書本
     -- 以下4個事件 都在 ui 文字貼好才觸發 , 無法判斷我想要的 選項數量 只能改用 繼承的方式處理
     EM:RegisterForEvent(OJTOP.name, EVENT_CHATTER_BEGIN, OJTOP.oj_chatter_begin) --npc講話
@@ -391,8 +443,8 @@ function OJTOP:Initialize()
 
     -- 一堆 TopLevel 視窗問題
     EM:RegisterForEvent(OJTOP.ename,EVENT_NEW_MOVEMENT_IN_UI_MODE, function() OJTOP.toggleOJTOPPanelView(0) end)
-    ZO_PreHookHandler(OJTOPStatusView,'OnMouseEnter', function() OJTOP.conmoveOJTOPStatusView(1) end)
-    ZO_PreHookHandler(OJTOPStatusView,'OnMouseExit', function() OJTOP.conmoveOJTOPStatusView(0) end)
+    -- ZO_PreHookHandler(OJTOPStatusView,'OnMouseEnter', function() OJTOP.conmoveOJTOPStatusView(1) end)
+    -- ZO_PreHookHandler(OJTOPStatusView,'OnMouseExit', function() OJTOP.conmoveOJTOPStatusView(0) end)
     ZO_PreHookHandler(ZO_QuestJournal,'OnShow', function() OJTOP.queststatus = true end)
     ZO_PreHookHandler(ZO_QuestJournal,'OnHide', function() OJTOP.queststatus = false; OJTOP.toggleOJTOPPanelView(0); end)
 

@@ -4,9 +4,6 @@
 			<Action name="SHOW_OJTOPPanelView">
 				<Down>OJTOP.toggleOJTOPPanelView()</Down>
 			</Action>
-			<Action name="STATUS_OJTOPPanelView">
-				<Down>OJTOP.statusOJTOPPanelView()</Down>
-			</Action>
 		</Category>
 	</Layer>
 </Bindings>

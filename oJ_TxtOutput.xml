@@ -45,7 +45,7 @@
                         </Backdrop>
                         <EditBox name="$(parent)TxtBox" color="FFFFFF" font="OJTOPFont" horizontalAlignment="LEFT" verticalAlignment="CENTER" text="" editEnabled="true" maxInputCharacters="10000" multiLine="true" newLineEnabled="true" inherits="ZO_DefaultEditMultiLineForBackdrop">
                             <Anchor offsetX="5" offsetY="5" point="TOPLEFT" relativePoint="TOPLEFT" />
-                            <Anchor offsetX="5" offsetY="5" point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" />
+                            <Anchor offsetX="-5" offsetY="-5" point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" />
                         </EditBox>
                     </Controls>
                 </Backdrop>
