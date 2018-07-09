@@ -241,7 +241,11 @@ ZO_LoreLibrary_ReadBook = function (categoryIndex, collectionIndex, bookIndex)
 end
 function OJTOP:showTxt2Box(main)
     OJTOPPanelViewOutputBoxTxtBox:Clear()
+
+    local length = ZoUTF8StringLength(main) + 1000
+    OJTOPPanelViewOutputBoxTxtBox:SetMaxInputChars(length)
     OJTOPPanelViewOutputBoxTxtBox:SetText(main)
+    
     if OJTOP.showingtype == 5 then
         if OJTOP.savedata.autoshowsubtitle == true then
             if OJTOP.withoutCombat == true then
