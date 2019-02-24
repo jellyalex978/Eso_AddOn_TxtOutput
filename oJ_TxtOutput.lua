@@ -2,7 +2,7 @@ OJTOP = {}
 OJTOP.ename = 'OJTOP'
 OJTOP.name = 'oJ_TxtOutput' -- sugar daddy
 OJTOP.author = 'oJelly'
-OJTOP.version = '1.3.1'
+OJTOP.version = '1.4.0'
 OJTOP.init = false
 OJTOP.savedata = {}
 local WM = WINDOW_MANAGER
@@ -13,7 +13,9 @@ local strformat = zo_strformat
 local init_savedef = {
     -- aleryuistatus = true, --icon show status
     autoshowstatus = true, --auto show status
-    autoshowsubtitle = true, --auto show subtitles
+    autoshowsubtitle = false, --auto show subtitles
+    autoselectalltxt = true, --auto select all
+    subtitlechat = true, --show to chat
     mainbox_pos = {70,120},
     statusicon_pos = {20,20},
 }
@@ -257,6 +259,13 @@ function OJTOP:showTxt2Box(main)
             OJTOP.toggleOJTOPPanelView(1);
         end
     end
+    if OJTOP.savedata.autoshowstatus == true then 
+        OJTOPPanelViewOutputBoxTxtBox:SelectAll()
+        OJTOPPanelViewOutputBoxTxtBox:TakeFocus()
+        -- eso deny copy
+        -- OJTOPPanelViewOutputBoxTxtBox:CopyAllTextToClipboard()
+        -- d('=====')
+    end
 end
 -- 硬讀書
 function OJTOP.ShowFilterBook()
@@ -313,19 +322,6 @@ function OJTOP.toggleOJTOPPanelView(open)
         SM:HideTopLevel(OJTOPPanelView)
     end
 end
-function OJTOP.statusOJTOPPanelView()
-    if OJTOP.savedata.autoshowstatus == true then
-        OJTOP.savedata.autoshowstatus = false
-    else
-        OJTOP.savedata.autoshowstatus = true
-    end
-
-    -- if OJTOP.savedata.autoshowstatus == false then
-    --     OJTOP.toggleOJTOPStatusView(1)
-    -- else
-    --     OJTOP.toggleOJTOPStatusView(0)
-    -- end
-end
 function OJTOP.toggleOJTOPStatusView(open)
     -- if open == nil then
     --     if OJTOP.savedata.aleryuistatus == true then
@@ -369,7 +365,7 @@ local function createLAM2Panel()
         registerForRefresh = true,
     }
     local optionsData = {
-        -- [1] = {
+        -- [tpl] = {
         --     type = "checkbox",
         --     name = 'show TxtOutput status icon',
         --     tooltip = 'show the status ui when you trun off auto show',
@@ -377,6 +373,7 @@ local function createLAM2Panel()
         --         return OJTOP.savedata.aleryuistatus
         --     end,
         --     setFunc = function(val) 
+        --         OJTOP.savedata.autoshowstatus = val
         --         OJTOP.toggleOJTOPStatusView(open)
         --     end,
         --     default = OJTOP.savedata.aleryuistatus,
@@ -384,18 +381,30 @@ local function createLAM2Panel()
         [1] = {
             type = "checkbox",
             name = 'auto show book/quest/talk',
-            tooltip = 'auto show TxtOutput with book/quest/talk UI',
+            tooltip = 'auto show TxtOutput with book/quest/talk UI open',
             getFunc = function() 
                 return OJTOP.savedata.autoshowstatus
             end,
             setFunc = function(val) 
-                OJTOP.statusOJTOPPanelView()
+                OJTOP.savedata.autoshowstatus = val
             end,
             default = OJTOP.savedata.autoshowstatus,
         },
         [2] = {
             type = "checkbox",
-            name = 'auto show Subtitle',
+            name = 'auto selec all text',
+            tooltip = 'select all text when TxtOutput show',
+            getFunc = function() 
+                return OJTOP.savedata.autoselectalltxt
+            end,
+            setFunc = function(val) 
+                OJTOP.savedata.autoselectalltxt = val
+            end,
+            default = OJTOP.savedata.autoselectalltxt,
+        },
+        [3] = {
+            type = "checkbox",
+            name = 'auto show Subtitle (NPC talk)',
             tooltip = 'auto show TxtOutput when subtitles update',
             getFunc = function() 
                 return OJTOP.savedata.autoshowsubtitle
@@ -405,9 +414,9 @@ local function createLAM2Panel()
             end,
             default = OJTOP.savedata.autoshowsubtitle,
         },
-        [3] = {
+        [4] = {
             type = "checkbox",
-            name = 'show Subtitle on CHAT',
+            name = 'show Subtitle on CHAT (NPC talk)',
             tooltip = 'show Subtitle on CHAT, you can install addon : Chat2Clipboard to copy it',
             getFunc = function() 
                 return OJTOP.savedata.subtitlechat
