@@ -2,7 +2,7 @@ OJTOP = {}
 OJTOP.ename = 'OJTOP'
 OJTOP.name = 'oJ_TxtOutput' -- sugar daddy
 OJTOP.author = 'oJelly'
-OJTOP.version = '1.4.0'
+OJTOP.version = '1.4.1'
 OJTOP.init = false
 OJTOP.savedata = {}
 local WM = WINDOW_MANAGER
@@ -259,7 +259,7 @@ function OJTOP:showTxt2Box(main)
             OJTOP.toggleOJTOPPanelView(1);
         end
     end
-    if OJTOP.savedata.autoshowstatus == true then 
+    if OJTOP.savedata.autoselectalltxt == true then 
         OJTOPPanelViewOutputBoxTxtBox:SelectAll()
         OJTOPPanelViewOutputBoxTxtBox:TakeFocus()
         -- eso deny copy
