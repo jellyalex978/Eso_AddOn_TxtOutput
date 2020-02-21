@@ -2,7 +2,7 @@ OJTOP = {}
 OJTOP.ename = 'OJTOP'
 OJTOP.name = 'oJ_TxtOutput' -- sugar daddy
 OJTOP.author = 'oJelly'
-OJTOP.version = '1.4.1'
+OJTOP.version = '1.4.2'
 OJTOP.init = false
 OJTOP.savedata = {}
 local WM = WINDOW_MANAGER
@@ -352,6 +352,14 @@ end
 function OJTOP.oJTxtOutputTest()
     
 end
+function OJTOP.oJTxtOutputCsStyle()
+    OJTOP:showTxt2Box( table2string(CS.Styles.list) )
+end
+function OJTOP.oJTxtOutputCsTrait()
+    OJTOP:showTxt2Box( table2string(CS.Data.researched) )
+end
+
+
 ----------------------------------------
 -- setting
 ----------------------------------------
@@ -468,6 +476,12 @@ function OJTOP:Initialize()
 
     SLASH_COMMANDS["/ojtoptest"] = function()
         OJTOP.oJTxtOutputTest()
+    end
+    SLASH_COMMANDS["/ojtop_cs_style"] = function()
+        OJTOP.oJTxtOutputCsStyle()
+    end
+    SLASH_COMMANDS["/ojtop_cs_trait"] = function()
+        OJTOP.oJTxtOutputCsTrait()
     end
 end
 function OJTOP.OnAddOnLoaded(event, addonName)
