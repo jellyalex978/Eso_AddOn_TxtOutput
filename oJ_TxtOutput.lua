@@ -2,7 +2,7 @@ OJTOP = {}
 OJTOP.ename = 'OJTOP'
 OJTOP.name = 'oJ_TxtOutput' -- sugar daddy
 OJTOP.author = 'oJelly'
-OJTOP.version = '1.4.2'
+OJTOP.version = '1.4.3'
 OJTOP.init = false
 OJTOP.savedata = {}
 local WM = WINDOW_MANAGER
@@ -26,7 +26,7 @@ OJTOP.talkoptcount = 0
 OJTOP.showingtype = 0 -- 0非subtitle , 5 subtitle
 OJTOP.withoutCombat  = true --就算有開自動顯示 戰鬥中也不秀
 
-local LAM2 = LibStub:GetLibrary("LibAddonMenu-2.0")
+local LAM2 = LibStub("LibAddonMenu-2.0")
 
 -- 因為無法有正確的事件 取得對話選項的更新狀態 只好繼承 副寫 每一個 setText 
 local OriginTitleSet = ZO_InteractWindowTargetAreaTitle.SetText
@@ -435,7 +435,7 @@ local function createLAM2Panel()
             default = OJTOP.savedata.subtitlechat,
         }
     }
-    local myPanel = LAM2:RegisterAddonPanel(OJTOP.name.."LAM2Options", panelData)
+    LAM2:RegisterAddonPanel(OJTOP.name.."LAM2Options", panelData)
     LAM2:RegisterOptionControls(OJTOP.name.."LAM2Options", optionsData)
 end
 ----------------------------------------
